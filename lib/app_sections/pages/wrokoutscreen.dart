@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getfit/components/colors.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
+// import 'package:fl_chart/fl_chart.dart';
+// import 'package:intl/intl.dart';
 
 class Workoutscreen extends StatefulWidget {
   const Workoutscreen({super.key});
