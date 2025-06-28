@@ -33,8 +33,8 @@ class _HomescreenState extends State<Homescreen> {
             children: [
               Center(
                 child: SvgPicture.asset(
-                  'assets/images/body_diagram1.svg',
-                  height: screenHeight * 0.33,
+                  'assets/images/heatmap.svg',
+                  height: screenHeight * 0.35,
                   width: screenWidth * 0.5,
                   fit: BoxFit.contain,
                 ),
