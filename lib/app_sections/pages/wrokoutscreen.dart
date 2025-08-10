@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:getfit/components/colors.dart';
-// import 'package:fl_chart/fl_chart.dart';
-// import 'package:intl/intl.dart';
 
 class Workoutscreen extends StatefulWidget {
   const Workoutscreen({super.key});
@@ -10,107 +8,883 @@ class Workoutscreen extends StatefulWidget {
   State<Workoutscreen> createState() => _WorkoutscreenState();
 }
 
-class _WorkoutscreenState extends State<Workoutscreen> {
+class _WorkoutscreenState extends State<Workoutscreen>
+    with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late AnimationController _floatingController;
+
+  // Sample workout routines data matching home theme
+  final List<Map<String, dynamic>> workoutRoutines = [
+    {
+      'name': 'Push Day',
+      'exercises': 6,
+      'duration': '45 min',
+      'difficulty': 'Intermediate',
+      'lastPerformed': '2 days ago',
+      'icon': Icons.fitness_center,
+      'color': Colors.orange.shade600,
+      'muscleGroups': ['Chest', 'Shoulders', 'Triceps'],
+      'completion': 0.85,
+    },
+    {
+      'name': 'Pull Day',
+      'exercises': 5,
+      'duration': '40 min',
+      'difficulty': 'Intermediate',
+      'lastPerformed': '4 days ago',
+      'icon': Icons.sports_gymnastics,
+      'color': Colors.blue.shade600,
+      'muscleGroups': ['Back', 'Biceps', 'Lats'],
+      'completion': 0.92,
+    },
+    {
+      'name': 'Leg Day',
+      'exercises': 7,
+      'duration': '50 min',
+      'difficulty': 'Advanced',
+      'lastPerformed': '1 week ago',
+      'icon': Icons.directions_run,
+      'color': Colors.green.shade600,
+      'muscleGroups': ['Quads', 'Hamstrings', 'Glutes'],
+      'completion': 0.78,
+    },
+  ];
+
+  // Sample workout history
+  final List<Map<String, dynamic>> workoutHistory = [
+    {
+      'date': 'Today',
+      'workout': 'Upper Body Strength',
+      'duration': '42 min',
+      'exercises': 8,
+      'caloriesBurned': 320,
+      'status': 'Completed',
+      'intensity': 'High',
+    },
+    {
+      'date': 'Yesterday',
+      'workout': 'HIIT Cardio',
+      'duration': '25 min',
+      'exercises': 6,
+      'caloriesBurned': 280,
+      'status': 'Completed',
+      'intensity': 'Medium',
+    },
+    {
+      'date': '2 days ago',
+      'workout': 'Push Day',
+      'duration': '45 min',
+      'exercises': 6,
+      'caloriesBurned': 350,
+      'status': 'Completed',
+      'intensity': 'High',
+    },
+  ];
+
+  // Workout categories matching home theme
+  final List<Map<String, dynamic>> workoutCategories = [
+    {
+      'name': 'Strength Training',
+      'workouts': 24,
+      'icon': Icons.fitness_center,
+      'color': Colors.orange.shade600,
+    },
+    {
+      'name': 'Cardio',
+      'workouts': 18,
+      'icon': Icons.favorite,
+      'color': Colors.blue.shade600,
+    },
+    {
+      'name': 'HIIT',
+      'workouts': 12,
+      'icon': Icons.flash_on,
+      'color': Colors.green.shade600,
+    },
+    {
+      'name': 'Flexibility',
+      'workouts': 15,
+      'icon': Icons.self_improvement,
+      'color': Colors.red.shade600,
+    },
+  ];
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Track Workout'), centerTitle: true),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Quick Start',
-                    style: TextStyle(
-                      color: AppColors.font1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.buttons,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _floatingController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _floatingController.dispose();
+    super.dispose();
+  }
+
+  // Responsive breakpoints
+  bool _isTablet(BuildContext context) =>
+      MediaQuery.of(context).size.width >= 768;
+  bool _isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= 1024;
+  bool _isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < 768;
+  bool _isSmallMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < 350;
+
+  // Responsive padding
+  EdgeInsets _getResponsivePadding(BuildContext context) {
+    if (_isDesktop(context)) return const EdgeInsets.all(32.0);
+    if (_isTablet(context)) return const EdgeInsets.all(24.0);
+    return const EdgeInsets.all(16.0);
+  }
+
+  // Responsive font size
+  double _getResponsiveFontSize(BuildContext context, double baseSize) {
+    if (_isDesktop(context)) return baseSize + 4;
+    if (_isTablet(context)) return baseSize + 2;
+    return baseSize;
+  }
+
+  // Welcome card matching home theme
+  Widget _buildWelcomeCard() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(_isMobile(context) ? 16 : 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.green.shade600, Colors.green.shade400],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize
+            .min, // KEY FIX: Prevent column from expanding unnecessarily
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize:
+                      MainAxisSize.min, // KEY FIX: Minimize vertical space
+                  children: [
+                    Text(
+                      'Ready to Workout?',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: _getResponsiveFontSize(context, 20),
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    icon: Icon(Icons.add, color: Colors.white),
-                    label: Text(
-                      'Start Empty Workout', //start a fresh workout which won't be saved in the routine section
-                      style: TextStyle(color: AppColors.font2),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Let\'s build those muscles!',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: _getResponsiveFontSize(context, 12),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Routines',
-                    style: TextStyle(
-                      color: AppColors.font1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+              ),
+              AnimatedBuilder(
+                animation: _floatingController,
+                builder: (context, child) {
+                  return Transform.translate(
+                    offset: Offset(0, 2 * _floatingController.value),
+                    child: Container(
+                      padding: EdgeInsets.all(_isMobile(context) ? 6 : 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.sports_gymnastics,
+                        color: Colors.white,
+                        size: _isMobile(context) ? 20 : 24,
+                      ),
                     ),
-                  ),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Stats row
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize:
+                      MainAxisSize.min, // KEY FIX: Minimize vertical space
+                  children: [
+                    Text(
+                      '3',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: _getResponsiveFontSize(context, 24),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'This week',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: _getResponsiveFontSize(context, 10),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              Container(
+                height: 40,
+                width: 1,
+                color: Colors.white.withOpacity(0.3),
+              ),
+              Expanded(
+                child: Column(
+                  mainAxisSize:
+                      MainAxisSize.min, // KEY FIX: Minimize vertical space
+                  children: [
+                    Text(
+                      '127',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: _getResponsiveFontSize(context, 24),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Total workouts',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: _getResponsiveFontSize(context, 10),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Routine card matching home theme
+  Widget _buildRoutineCard(Map<String, dynamic> routine) {
+    final String name = routine['name'] ?? 'Unknown Workout';
+    final int exercises = routine['exercises'] ?? 0;
+    final String duration = routine['duration'] ?? '0 min';
+    final String difficulty = routine['difficulty'] ?? 'Beginner';
+    final String lastPerformed = routine['lastPerformed'] ?? 'Never';
+    final IconData icon = routine['icon'] ?? Icons.fitness_center;
+    final Color color = routine['color'] ?? Colors.orange.shade600;
+    final List<String> muscleGroups = List<String>.from(
+      routine['muscleGroups'] ?? [],
+    );
+    final double completion = routine['completion'] ?? 0.0;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: _isMobile(context) ? 16 : 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Starting $name workout...'),
+                backgroundColor: color,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            );
+          },
+          child: Padding(
+            padding: EdgeInsets.all(_isMobile(context) ? 16 : 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize:
+                  MainAxisSize.min, // KEY FIX: Minimize vertical space
+              children: [
+                // Header
                 Row(
                   children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon, color: color, size: 24),
+                    ),
+                    const SizedBox(width: 16),
                     Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.buttons,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize
+                            .min, // KEY FIX: Minimize vertical space
+                        children: [
+                          Text(
+                            name,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: _getResponsiveFontSize(context, 18),
+                              color: AppColors.font1,
+                            ),
                           ),
-                        ),
-                        icon: Icon(Icons.note_add, color: Colors.white),
-                        label: Text(
-                          'New Routine', //create and store routine for using later
-                          style: TextStyle(color: AppColors.font2),
-                        ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$exercises exercises • $duration',
+                            style: TextStyle(
+                              fontSize: _getResponsiveFontSize(context, 14),
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.buttons,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        icon: Icon(Icons.search, color: Colors.white),
-                        label: Text(
-                          'Explore', //wil lead to various workout styles and splits
-                          style: TextStyle(color: AppColors.font2),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.green.shade200),
+                      ),
+                      child: Text(
+                        difficulty,
+                        style: TextStyle(
+                          color: Colors.green.shade700,
+                          fontSize: _getResponsiveFontSize(context, 12),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Added workout will be stored here'),
+
+                const SizedBox(height: 16),
+
+                // Progress
+                Text(
+                  'Progress: ${(completion * 100).toInt()}%',
+                  style: TextStyle(
+                    fontSize: _getResponsiveFontSize(context, 12),
+                    color: Colors.grey.shade700,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Workout History will be displayed here'),
+                const SizedBox(height: 8),
+                LinearProgressIndicator(
+                  value: completion,
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                  minHeight: 6,
+                ),
+
+                const SizedBox(height: 16),
+
+                // Muscle groups
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: muscleGroups
+                      .map(
+                        (group) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            group,
+                            style: TextStyle(
+                              fontSize: _getResponsiveFontSize(context, 12),
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+
+                const SizedBox(height: 12),
+
+                Text(
+                  'Last performed: $lastPerformed',
+                  style: TextStyle(
+                    fontSize: _getResponsiveFontSize(context, 12),
+                    color: Colors.grey.shade500,
+                  ),
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // History item matching home theme
+  Widget _buildHistoryItem(Map<String, dynamic> item) {
+    final String date = item['date'] ?? 'Unknown Date';
+    final String workout = item['workout'] ?? 'Unknown Workout';
+    final String duration = item['duration'] ?? '0 min';
+    final int exercises = item['exercises'] ?? 0;
+    final int caloriesBurned = item['caloriesBurned'] ?? 0;
+    final String status = item['status'] ?? 'Unknown';
+
+    return Container(
+      margin: EdgeInsets.only(bottom: _isMobile(context) ? 12 : 16),
+      padding: EdgeInsets.all(_isMobile(context) ? 12 : 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min, // KEY FIX: Minimize vertical space
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize:
+                      MainAxisSize.min, // KEY FIX: Minimize vertical space
+                  children: [
+                    Text(
+                      date,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: _getResponsiveFontSize(context, 14),
+                        color: AppColors.font1,
+                      ),
+                    ),
+                    Text(
+                      workout,
+                      style: TextStyle(
+                        fontSize: _getResponsiveFontSize(context, 12),
+                        color: Colors.grey.shade600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: Colors.green.shade700,
+                    fontSize: _getResponsiveFontSize(context, 10),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              _buildStatChip(Icons.timer, duration, Colors.blue.shade600),
+              const SizedBox(width: 12),
+              _buildStatChip(
+                Icons.fitness_center,
+                '$exercises ex',
+                Colors.orange.shade600,
+              ),
+              const SizedBox(width: 12),
+              _buildStatChip(
+                Icons.local_fire_department,
+                '$caloriesBurned cal',
+                Colors.red.shade600,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Stat chip matching home theme
+  Widget _buildStatChip(IconData icon, String text, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: _getResponsiveFontSize(context, 11),
+            color: color,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // COMPLETELY FIXED: Category card with no overflow
+  Widget _buildCategoryCard(Map<String, dynamic> category) {
+    final String name = category['name'] ?? 'Unknown';
+    final int workouts = category['workouts'] ?? 0;
+    final IconData icon = category['icon'] ?? Icons.fitness_center;
+    final Color color = category['color'] ?? Colors.orange.shade600;
+
+    final cardWidth = _isDesktop(context)
+        ? 150.0 // Reduced width
+        : _isTablet(context)
+        ? 130.0 // Reduced width
+        : _isSmallMobile(context)
+        ? 100.0 // Much smaller for small mobile
+        : 110.0; // Reduced width for mobile
+
+    return Container(
+      width: cardWidth,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12), // Slightly smaller radius
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            // Navigate to category
+          },
+          child: Padding(
+            padding: EdgeInsets.all(
+              _isSmallMobile(context) ? 8 : 12,
+            ), // Reduced padding
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // KEY FIX: Use minimum size
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(
+                    _isSmallMobile(context) ? 6 : 8,
+                  ), // Reduced icon padding
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8), // Smaller radius
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: _isSmallMobile(context) ? 16 : 20, // Smaller icon
+                  ),
+                ),
+                SizedBox(
+                  height: _isSmallMobile(context) ? 6 : 8,
+                ), // Reduced spacing
+                Flexible(
+                  // KEY FIX: Make text flexible
+                  child: Text(
+                    name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: _getResponsiveFontSize(
+                        context,
+                        _isSmallMobile(context) ? 9 : 10,
+                      ), // Smaller font
+                      color: AppColors.font1,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2, // Allow up to 2 lines
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(height: 2), // Minimal spacing
+                Text(
+                  '$workouts',
+                  style: TextStyle(
+                    fontSize: _getResponsiveFontSize(
+                      context,
+                      _isSmallMobile(context) ? 7 : 8,
+                    ), // Smaller font
+                    color: Colors.grey.shade600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final padding = _getResponsivePadding(context);
+
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        title: Text(
+          'Track Workout',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: _getResponsiveFontSize(context, 26),
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.notifications_outlined,
+              size: _isMobile(context) ? 22 : 24,
+            ),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome card
+              _buildWelcomeCard(),
+
+              SizedBox(height: _isMobile(context) ? 16 : 24),
+
+              // Quick Start Section
+              Text(
+                'Quick Start',
+                style: TextStyle(
+                  color: AppColors.font1,
+                  fontWeight: FontWeight.bold,
+                  fontSize: _getResponsiveFontSize(context, 18),
+                ),
+              ),
+              SizedBox(height: _isMobile(context) ? 12 : 16),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Starting empty workout...'),
+                        backgroundColor: AppColors.buttons,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttons,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      vertical: _isMobile(context) ? 14 : 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(
+                    'Start Empty Workout',
+                    style: TextStyle(
+                      fontSize: _getResponsiveFontSize(context, 14),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: _isMobile(context) ? 16 : 24),
+
+              // Categories Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Explore Categories',
+                    style: TextStyle(
+                      color: AppColors.font1,
+                      fontWeight: FontWeight.bold,
+                      fontSize: _getResponsiveFontSize(context, 18),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      'View All',
+                      style: TextStyle(
+                        color: AppColors.buttons,
+                        fontSize: _getResponsiveFontSize(context, 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: _isMobile(context) ? 12 : 16),
+
+              // COMPLETELY FIXED: ListView with proper configuration
+              SizedBox(
+                height: _isSmallMobile(context)
+                    ? 80
+                    : 90, // Reduced height significantly
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true, // KEY FIX: Let content determine height
+                  physics:
+                      const AlwaysScrollableScrollPhysics(), // KEY FIX: Enable proper scrolling
+                  itemCount: workoutCategories.length,
+                  itemBuilder: (context, index) {
+                    return _buildCategoryCard(workoutCategories[index]);
+                  },
+                ),
+              ),
+
+              SizedBox(height: _isMobile(context) ? 16 : 24),
+
+              // Routines Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Your Routines',
+                    style: TextStyle(
+                      color: AppColors.font1,
+                      fontWeight: FontWeight.bold,
+                      fontSize: _getResponsiveFontSize(context, 18),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.note_add,
+                      size: 16,
+                      color: AppColors.buttons,
+                    ),
+                    label: Text(
+                      'New',
+                      style: TextStyle(
+                        color: AppColors.buttons,
+                        fontSize: _getResponsiveFontSize(context, 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: _isMobile(context) ? 12 : 16),
+
+              // Routine cards
+              ...workoutRoutines.map((routine) => _buildRoutineCard(routine)),
+
+              SizedBox(height: _isMobile(context) ? 16 : 24),
+
+              // Recent Workouts Section
+              Text(
+                'Recent Workouts',
+                style: TextStyle(
+                  color: AppColors.font1,
+                  fontWeight: FontWeight.bold,
+                  fontSize: _getResponsiveFontSize(context, 18),
+                ),
+              ),
+              SizedBox(height: _isMobile(context) ? 12 : 16),
+
+              // History items
+              ...workoutHistory.map((item) => _buildHistoryItem(item)),
+
+              // View all button
+              Center(
+                child: TextButton.icon(
+                  onPressed: () {},
+                  icon: Icon(
+                    Icons.history,
+                    size: 18,
+                    color: Colors.grey.shade600,
+                  ),
+                  label: Text(
+                    'View Full History',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: _getResponsiveFontSize(context, 12),
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: _isMobile(context) ? 16 : 24),
+            ],
           ),
         ),
       ),

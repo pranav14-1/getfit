@@ -9,178 +9,732 @@ class Nutritionscreen extends StatefulWidget {
   State<Nutritionscreen> createState() => _NutritionscreenState();
 }
 
-class _NutritionscreenState extends State<Nutritionscreen> {
+class _NutritionscreenState extends State<Nutritionscreen>
+    with TickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  // Form controllers
+  final TextEditingController _foodController = TextEditingController();
+  final TextEditingController _foodQuantityController = TextEditingController();
+  final TextEditingController _drinkController = TextEditingController();
+  final TextEditingController _drinkQuantityController =
+      TextEditingController();
+
+  // Sample data for macros
+  final Map<String, double> macroData = {
+    'protein': 0.65, // 65% of daily goal
+    'carbs': 0.43, // 43% of daily goal
+    'fats': 0.28, // 28% of daily goal
+  };
+
+  // Updated diet history with explicit types and null safety
+  final List<Map<String, dynamic>> dietHistory = [
+    <String, dynamic>{
+      'date': 'Today',
+      'fullDate': 'Dec 15, 2024',
+      'totalCalories': 890,
+      'mealsCount': 3,
+      'targetCalories': 2200,
+      'progress': 0.40,
+      'status': 'On Track',
+    },
+    <String, dynamic>{
+      'date': 'Yesterday',
+      'fullDate': 'Dec 14, 2024',
+      'totalCalories': 2150,
+      'mealsCount': 4,
+      'targetCalories': 2200,
+      'progress': 0.98,
+      'status': 'Excellent',
+    },
+    <String, dynamic>{
+      'date': 'Dec 13',
+      'fullDate': 'Dec 13, 2024',
+      'totalCalories': 1850,
+      'mealsCount': 3,
+      'targetCalories': 2200,
+      'progress': 0.84,
+      'status': 'Good',
+    },
+    <String, dynamic>{
+      'date': 'Dec 12',
+      'fullDate': 'Dec 12, 2024',
+      'totalCalories': 2350,
+      'mealsCount': 5,
+      'targetCalories': 2200,
+      'progress': 1.07,
+      'status': 'Over Target',
+    },
+    <String, dynamic>{
+      'date': 'Dec 11',
+      'fullDate': 'Dec 11, 2024',
+      'totalCalories': 1950,
+      'mealsCount': 4,
+      'targetCalories': 2200,
+      'progress': 0.89,
+      'status': 'Good',
+    },
+  ];
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Track Nutrition'), centerTitle: true),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Daily Macros',
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _foodController.dispose();
+    _foodQuantityController.dispose();
+    _drinkController.dispose();
+    _drinkQuantityController.dispose();
+    super.dispose();
+  }
+
+  // Responsive breakpoints
+  bool _isTablet(BuildContext context) =>
+      MediaQuery.of(context).size.width >= 768;
+  bool _isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= 1024;
+  bool _isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < 768;
+
+  // Responsive padding
+  EdgeInsets _getResponsivePadding(BuildContext context) {
+    if (_isDesktop(context)) return const EdgeInsets.all(32.0);
+    if (_isTablet(context)) return const EdgeInsets.all(24.0);
+    return const EdgeInsets.all(16.0);
+  }
+
+  // Responsive font size
+  double _getResponsiveFontSize(BuildContext context, double baseSize) {
+    if (_isDesktop(context)) return baseSize + 4;
+    if (_isTablet(context)) return baseSize + 2;
+    return baseSize;
+  }
+
+  // Build macro progress indicator
+  Widget _buildMacroIndicator({
+    required BuildContext context,
+    required String title,
+    required double percent,
+    required Color color,
+    required String current,
+    required String target,
+  }) {
+    final radius = _isMobile(context)
+        ? 35.0
+        : _isTablet(context)
+        ? 40.0
+        : 45.0;
+
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.all(_isMobile(context) ? 12 : 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            CircularPercentIndicator(
+              radius: radius,
+              lineWidth: _isMobile(context) ? 6 : 8,
+              percent: percent,
+              progressColor: color,
+              backgroundColor: color.withOpacity(0.2),
+              circularStrokeCap: CircularStrokeCap.round,
+              center: Text(
+                '${(percent * 100).toInt()}%',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: _isMobile(context) ? 12 : 14,
+                  color: color,
+                ),
+              ),
+            ),
+            SizedBox(height: _isMobile(context) ? 8 : 12),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: _isMobile(context) ? 12 : 14,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            Text(
+              '$current/$target',
+              style: TextStyle(
+                fontSize: _isMobile(context) ? 10 : 12,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Build responsive text field
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required String hintText,
+    TextInputType? keyboardType,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          filled: true,
+          fillColor: Colors.grey.shade50,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade200),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.buttons, width: 2),
+          ),
+          labelStyle: TextStyle(color: Colors.grey.shade600),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Build diet history item with daily totals and null safety
+  Widget _buildDietHistoryItem(Map<String, dynamic> item) {
+    // Get status color with null safety
+    Color getStatusColor(String? status, double? progress) {
+      if (status == null || progress == null) return Colors.grey;
+
+      if (status == 'Excellent' || (progress >= 0.95 && progress <= 1.05)) {
+        return Colors.green;
+      } else if (status == 'Over Target' || progress > 1.05) {
+        return Colors.red;
+      } else if (status == 'Good' || progress >= 0.80) {
+        return Colors.orange;
+      } else {
+        return Colors.grey;
+      }
+    }
+
+    // Safe access to map values with null checks
+    final String date = item['date'] ?? 'Unknown Date';
+    final String fullDate = item['fullDate'] ?? '';
+    final int totalCalories = item['totalCalories'] ?? 0;
+    final int mealsCount = item['mealsCount'] ?? 0;
+    final int targetCalories = item['targetCalories'] ?? 2200;
+    final double progress = (item['progress'] ?? 0.0).toDouble();
+    final String status = item['status'] ?? 'Unknown';
+
+    final statusColor = getStatusColor(status, progress);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(_isMobile(context) ? 12 : 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    date,
                     style: TextStyle(
-                      color: AppColors.font1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      fontSize: _isMobile(context) ? 16 : 18,
+                      color: Colors.grey.shade800,
                     ),
                   ),
+                  if (fullDate.isNotEmpty)
+                    Text(
+                      fullDate,
+                      style: TextStyle(
+                        fontSize: _isMobile(context) ? 12 : 14,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: statusColor.withOpacity(0.3)),
                 ),
-                SizedBox(height: 15),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: CircularPercentIndicator(
-                          radius: 50,
-                          lineWidth: 9,
-                          percent:
-                              0.4, //later adjust according to user requirement
-                          progressColor: Colors.black54,
-                          backgroundColor: Colors.black38,
-                          circularStrokeCap: CircularStrokeCap.round,
-                          center: Text('Protein'),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: _isMobile(context) ? 11 : 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Progress bar
+          Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.local_fire_department,
+                        size: 16,
+                        color: Colors.orange.shade600,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$totalCalories cal',
+                        style: TextStyle(
+                          fontSize: _isMobile(context) ? 14 : 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade800,
                         ),
                       ),
+                    ],
+                  ),
+                  Text(
+                    '$mealsCount meals',
+                    style: TextStyle(
+                      fontSize: _isMobile(context) ? 12 : 14,
+                      color: Colors.grey.shade600,
                     ),
-                    Expanded(
-                      child: Center(
-                        child: CircularPercentIndicator(
-                          radius: 50,
-                          lineWidth: 9,
-                          percent: 0.7,
-                          progressColor: Colors.black54,
-                          backgroundColor: Colors.black38,
-                          circularStrokeCap: CircularStrokeCap.round,
-                          center: Text('Carbs'),
-                        ),
-                      ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: progress > 1.0 ? 1.0 : progress,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                minHeight: 6,
+                borderRadius: BorderRadius.circular(3),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${(progress * 100).toInt()}% of target',
+                    style: TextStyle(
+                      fontSize: _isMobile(context) ? 10 : 12,
+                      color: Colors.grey.shade500,
                     ),
-                    Expanded(
-                      child: Center(
-                        child: CircularPercentIndicator(
-                          radius: 50,
-                          lineWidth: 9,
-                          percent: 0.2,
-                          progressColor: Colors.black54,
-                          backgroundColor: Colors.black38,
-                          circularStrokeCap: CircularStrokeCap.round,
-                          center: Text('Fats'),
-                        ),
-                      ),
+                  ),
+                  Text(
+                    'Target: $targetCalories cal',
+                    style: TextStyle(
+                      fontSize: _isMobile(context) ? 10 : 12,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final padding = _getResponsivePadding(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Track Nutrition',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: _getResponsiveFontSize(context, 20),
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Daily Overview Card
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(_isMobile(context) ? 16 : 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.green.shade600, Colors.green.shade400],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                Divider(thickness: 2, height: 60),
-                Column(
+                child: Column(
                   children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Today\'s Intake',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: _getResponsiveFontSize(context, 18),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Keep up the great work!',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: _getResponsiveFontSize(context, 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.restaurant_menu,
+                            color: Colors.white,
+                            size: _isMobile(context) ? 20 : 24,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text(
+                                '890',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: _getResponsiveFontSize(context, 24),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'Calories consumed',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: _getResponsiveFontSize(context, 10),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          height: 40,
+                          width: 1,
+                          color: Colors.white.withOpacity(0.3),
+                        ),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text(
+                                '1,310',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: _getResponsiveFontSize(context, 24),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'Remaining',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: _getResponsiveFontSize(context, 10),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: _isMobile(context) ? 20 : 24),
+
+              // Daily Macros Section
+              Text(
+                'Daily Macros',
+                style: TextStyle(
+                  color: AppColors.font1,
+                  fontWeight: FontWeight.bold,
+                  fontSize: _getResponsiveFontSize(context, 18),
+                ),
+              ),
+              SizedBox(height: _isMobile(context) ? 12 : 16),
+
+              Row(
+                children: [
+                  _buildMacroIndicator(
+                    context: context,
+                    title: 'Protein',
+                    percent: macroData['protein']!,
+                    color: Colors.blue.shade600,
+                    current: '98g',
+                    target: '150g',
+                  ),
+                  const SizedBox(width: 12),
+                  _buildMacroIndicator(
+                    context: context,
+                    title: 'Carbs',
+                    percent: macroData['carbs']!,
+                    color: Colors.orange.shade600,
+                    current: '86g',
+                    target: '200g',
+                  ),
+                  const SizedBox(width: 12),
+                  _buildMacroIndicator(
+                    context: context,
+                    title: 'Fats',
+                    percent: macroData['fats']!,
+                    color: Colors.purple.shade600,
+                    current: '28g',
+                    target: '100g',
+                  ),
+                ],
+              ),
+
+              SizedBox(height: _isMobile(context) ? 20 : 24),
+
+              // Log Intake Section
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(_isMobile(context) ? 16 : 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.add_circle_outline,
+                          color: AppColors.buttons,
+                          size: _isMobile(context) ? 20 : 24,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Log Intake',
+                          style: TextStyle(
+                            color: AppColors.font1,
+                            fontWeight: FontWeight.bold,
+                            fontSize: _getResponsiveFontSize(context, 18),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: _isMobile(context) ? 16 : 20),
+
+                    // Whole Foods Section
                     Text(
-                      'Log Intake',
+                      'Whole Foods',
                       style: TextStyle(
                         color: AppColors.font1,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        fontSize: _getResponsiveFontSize(context, 14),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Whole Foods',
-                        style: TextStyle(
-                          color: AppColors.font1,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                      controller: _foodController,
+                      labelText: 'Food item',
+                      hintText: 'e.g., Grilled chicken breast',
+                    ),
+                    _buildTextField(
+                      controller: _foodQuantityController,
+                      labelText: 'Quantity (grams)',
+                      hintText: 'e.g., 150',
+                      keyboardType: TextInputType.number,
+                    ),
+
+                    // Beverages Section
+                    Text(
+                      'Beverages',
+                      style: TextStyle(
+                        color: AppColors.font1,
+                        fontWeight: FontWeight.w600,
+                        fontSize: _getResponsiveFontSize(context, 14),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Add your food',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                      controller: _drinkController,
+                      labelText: 'Beverage',
+                      hintText: 'e.g., Green smoothie',
                     ),
-                    SizedBox(height: 10),
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Enter the quantity in grams',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
+                    _buildTextField(
+                      controller: _drinkQuantityController,
+                      labelText: 'Quantity (ml)',
+                      hintText: 'e.g., 250',
+                      keyboardType: TextInputType.number,
                     ),
-                    SizedBox(height: 20),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Beverages',
-                        style: TextStyle(
-                          color: AppColors.font1,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Add your drink',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Enter the quantity in ml',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
+
+                    const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          // Add your logic here
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text(
+                                'Intake logged successfully!',
+                              ),
+                              backgroundColor: Colors.green.shade600,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.buttons,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                            vertical: _isMobile(context) ? 14 : 16,
                           ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
                         ),
-                        icon: Icon(Icons.add, color: Colors.white),
+                        icon: const Icon(Icons.add, size: 20),
                         label: Text(
                           'Add Calories Intake',
-                          style: TextStyle(color: AppColors.font2),
-                        ),
-                      ),
-                    ),
-                    Divider(thickness: 2, height: 60),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Diet History',
-                        style: TextStyle(
-                          color: AppColors.font1,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                          style: TextStyle(
+                            fontSize: _getResponsiveFontSize(context, 14),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+
+              SizedBox(height: _isMobile(context) ? 20 : 24),
+
+              // Diet History Section
+              Text(
+                'Diet History',
+                style: TextStyle(
+                  color: AppColors.font1,
+                  fontWeight: FontWeight.bold,
+                  fontSize: _getResponsiveFontSize(context, 18),
+                ),
+              ),
+              SizedBox(height: _isMobile(context) ? 12 : 16),
+
+              // History items with daily totals
+              ...dietHistory
+                  .map((item) => _buildDietHistoryItem(item))
+                  .toList(),
+
+              // View all button
+              Center(
+                child: TextButton.icon(
+                  onPressed: () {
+                    // Navigate to full history
+                  },
+                  icon: Icon(
+                    Icons.history,
+                    size: 18,
+                    color: Colors.grey.shade600,
+                  ),
+                  label: Text(
+                    'View Full History',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: _getResponsiveFontSize(context, 12),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),
