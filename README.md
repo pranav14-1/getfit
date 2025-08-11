@@ -1,16 +1,28 @@
-# fitlog
+# GetFit 🏋️‍♂️
 
-A new Flutter project.
+A comprehensive Flutter fitness application with workout tracking, nutrition monitoring, and AI-powered coaching assistance.
 
-## Getting Started
+## 🚀 Features
 
-This project is a starting point for a Flutter application.
+- **Interactive Dashboard** - Workout heatmap, progress tracking, quick access cards
+- **AI Fitness Coach** - ChatGPT-style chat interface for personalized assistance
+- **Workout Tracking** - Muscle group visualization with intensity levels
+- **Nutrition Management** - Meal exploration and calorie tracking
+- **User Profile** - Theme switching, settings, progress statistics
+- **Authentication** - Login/signup with social options and guest mode
 
-A few resources to get you started if this is your first Flutter project:
+## 🎨 Tech Stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Flutter** - Cross-platform UI framework
+- **SVG Integration** - Dynamic muscle group visualization
+- **Responsive Design** - Mobile, tablet, desktop support
+- **Material Design** - Modern UI components
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🚀 Upcoming Features
+
+- Real AI integration
+- Advanced workout tracking
+- Progress analytics
+- Social features
+- Wearable integration
+
