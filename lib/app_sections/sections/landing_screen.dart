@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:getfit/app_sections/pages/homescreen.dart';
 import 'package:getfit/components/colors.dart';
 
 import 'package:getfit/user_sign_in/login.dart';
