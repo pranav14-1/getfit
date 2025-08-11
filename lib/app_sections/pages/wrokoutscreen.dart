@@ -24,7 +24,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
       'icon': Icons.fitness_center,
       'color': Colors.orange.shade600,
       'muscleGroups': ['Chest', 'Shoulders', 'Triceps'],
-      'completion': 0.85,
     },
     {
       'name': 'Pull Day',
@@ -35,7 +34,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
       'icon': Icons.sports_gymnastics,
       'color': Colors.blue.shade600,
       'muscleGroups': ['Back', 'Biceps', 'Lats'],
-      'completion': 0.92,
     },
     {
       'name': 'Leg Day',
@@ -46,7 +44,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
       'icon': Icons.directions_run,
       'color': Colors.green.shade600,
       'muscleGroups': ['Quads', 'Hamstrings', 'Glutes'],
-      'completion': 0.78,
     },
   ];
 
@@ -78,34 +75,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
       'caloriesBurned': 350,
       'status': 'Completed',
       'intensity': 'High',
-    },
-  ];
-
-  // Workout categories matching home theme
-  final List<Map<String, dynamic>> workoutCategories = [
-    {
-      'name': 'Strength Training',
-      'workouts': 24,
-      'icon': Icons.fitness_center,
-      'color': Colors.orange.shade600,
-    },
-    {
-      'name': 'Cardio',
-      'workouts': 18,
-      'icon': Icons.favorite,
-      'color': Colors.blue.shade600,
-    },
-    {
-      'name': 'HIIT',
-      'workouts': 12,
-      'icon': Icons.flash_on,
-      'color': Colors.green.shade600,
-    },
-    {
-      'name': 'Flexibility',
-      'workouts': 15,
-      'icon': Icons.self_improvement,
-      'color': Colors.red.shade600,
     },
   ];
 
@@ -174,8 +143,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
         ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize
-            .min, // KEY FIX: Prevent column from expanding unnecessarily
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -183,8 +151,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
               Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize:
-                      MainAxisSize.min, // KEY FIX: Minimize vertical space
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'Ready to Workout?',
@@ -233,8 +200,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
             children: [
               Expanded(
                 child: Column(
-                  mainAxisSize:
-                      MainAxisSize.min, // KEY FIX: Minimize vertical space
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       '3',
@@ -261,8 +227,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
               ),
               Expanded(
                 child: Column(
-                  mainAxisSize:
-                      MainAxisSize.min, // KEY FIX: Minimize vertical space
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       '127',
@@ -289,7 +254,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
     );
   }
 
-  // Routine card matching home theme
+  // Routine card with progress bar removed
   Widget _buildRoutineCard(Map<String, dynamic> routine) {
     final String name = routine['name'] ?? 'Unknown Workout';
     final int exercises = routine['exercises'] ?? 0;
@@ -301,7 +266,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
     final List<String> muscleGroups = List<String>.from(
       routine['muscleGroups'] ?? [],
     );
-    final double completion = routine['completion'] ?? 0.0;
 
     return Container(
       margin: EdgeInsets.only(bottom: _isMobile(context) ? 16 : 24),
@@ -337,8 +301,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
             padding: EdgeInsets.all(_isMobile(context) ? 16 : 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize:
-                  MainAxisSize.min, // KEY FIX: Minimize vertical space
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Header
                 Row(
@@ -355,8 +318,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize
-                            .min, // KEY FIX: Minimize vertical space
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             name,
@@ -397,25 +359,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
                       ),
                     ),
                   ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Progress
-                Text(
-                  'Progress: ${(completion * 100).toInt()}%',
-                  style: TextStyle(
-                    fontSize: _getResponsiveFontSize(context, 12),
-                    color: Colors.grey.shade700,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: completion,
-                  backgroundColor: Colors.grey.shade200,
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
-                  minHeight: 6,
                 ),
 
                 const SizedBox(height: 16),
@@ -490,7 +433,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min, // KEY FIX: Minimize vertical space
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -498,8 +441,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
               Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize:
-                      MainAxisSize.min, // KEY FIX: Minimize vertical space
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       date,
@@ -582,106 +524,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
     );
   }
 
-  // COMPLETELY FIXED: Category card with no overflow
-  Widget _buildCategoryCard(Map<String, dynamic> category) {
-    final String name = category['name'] ?? 'Unknown';
-    final int workouts = category['workouts'] ?? 0;
-    final IconData icon = category['icon'] ?? Icons.fitness_center;
-    final Color color = category['color'] ?? Colors.orange.shade600;
-
-    final cardWidth = _isDesktop(context)
-        ? 150.0 // Reduced width
-        : _isTablet(context)
-        ? 130.0 // Reduced width
-        : _isSmallMobile(context)
-        ? 100.0 // Much smaller for small mobile
-        : 110.0; // Reduced width for mobile
-
-    return Container(
-      width: cardWidth,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12), // Slightly smaller radius
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            // Navigate to category
-          },
-          child: Padding(
-            padding: EdgeInsets.all(
-              _isSmallMobile(context) ? 8 : 12,
-            ), // Reduced padding
-            child: Column(
-              mainAxisSize: MainAxisSize.min, // KEY FIX: Use minimum size
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(
-                    _isSmallMobile(context) ? 6 : 8,
-                  ), // Reduced icon padding
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8), // Smaller radius
-                  ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: _isSmallMobile(context) ? 16 : 20, // Smaller icon
-                  ),
-                ),
-                SizedBox(
-                  height: _isSmallMobile(context) ? 6 : 8,
-                ), // Reduced spacing
-                Flexible(
-                  // KEY FIX: Make text flexible
-                  child: Text(
-                    name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: _getResponsiveFontSize(
-                        context,
-                        _isSmallMobile(context) ? 9 : 10,
-                      ), // Smaller font
-                      color: AppColors.font1,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2, // Allow up to 2 lines
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(height: 2), // Minimal spacing
-                Text(
-                  '$workouts',
-                  style: TextStyle(
-                    fontSize: _getResponsiveFontSize(
-                      context,
-                      _isSmallMobile(context) ? 7 : 8,
-                    ), // Smaller font
-                    color: Colors.grey.shade600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final padding = _getResponsivePadding(context);
@@ -689,6 +531,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           'Track Workout',
           style: TextStyle(
@@ -699,15 +542,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.notifications_outlined,
-              size: _isMobile(context) ? 22 : 24,
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -764,51 +598,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
-              ),
-
-              SizedBox(height: _isMobile(context) ? 16 : 24),
-
-              // Categories Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Explore Categories',
-                    style: TextStyle(
-                      color: AppColors.font1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: _getResponsiveFontSize(context, 18),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'View All',
-                      style: TextStyle(
-                        color: AppColors.buttons,
-                        fontSize: _getResponsiveFontSize(context, 12),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: _isMobile(context) ? 12 : 16),
-
-              // COMPLETELY FIXED: ListView with proper configuration
-              SizedBox(
-                height: _isSmallMobile(context)
-                    ? 80
-                    : 90, // Reduced height significantly
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  shrinkWrap: true, // KEY FIX: Let content determine height
-                  physics:
-                      const AlwaysScrollableScrollPhysics(), // KEY FIX: Enable proper scrolling
-                  itemCount: workoutCategories.length,
-                  itemBuilder: (context, index) {
-                    return _buildCategoryCard(workoutCategories[index]);
-                  },
                 ),
               ),
 

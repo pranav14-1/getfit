@@ -2,13 +2,13 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:getfit/app_sections/pages/homescreen.dart';
+import 'package:getfit/app_sections/sections/landing_screen.dart';
+import 'package:getfit/user_sign_in/login.dart';
+import 'package:getfit/user_sign_in/signup.dart';
 
 void main() {
   runApp(
-    DevicePreview(
-      enabled: !kReleaseMode, 
-      builder: (context) => const MyApp(),
-    ),
+    DevicePreview(enabled: !kReleaseMode, builder: (context) => const MyApp()),
   );
 }
 
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       builder: DevicePreview.appBuilder,
 
       debugShowCheckedModeBanner: false,
-      home: Homescreen(),
+      home: LandingScreen(),
     );
   }
 }

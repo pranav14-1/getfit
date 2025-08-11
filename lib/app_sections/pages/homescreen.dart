@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
+import 'package:getfit/app_sections/sections/profile_screen.dart';
 import 'package:getfit/components/colors.dart';
 import 'package:getfit/app_sections/pages/nutritionscreen.dart';
 import 'package:getfit/app_sections/pages/wrokoutscreen.dart';
@@ -19,6 +20,11 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
 
   String? svgContent;
+
+  // Chat messages list
+  final List<Map<String, dynamic>> _chatMessages = [];
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _chatScrollController = ScrollController();
 
   // 🏋️ Set counts per body part for this week
   final Map<String, int> setData = {
@@ -88,6 +94,56 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
     'head_2': 1,
   };
 
+  // Sample workouts data
+  final List<Map<String, dynamic>> exploreWorkouts = [
+    {
+      'name': 'HIIT Training',
+      'duration': '20 min',
+      'difficulty': 'High',
+      'icon': Icons.flash_on,
+      'color': Colors.orange.shade600,
+    },
+    {
+      'name': 'Strength Training',
+      'duration': '45 min',
+      'difficulty': 'Medium',
+      'icon': Icons.fitness_center,
+      'color': Colors.blue.shade600,
+    },
+    {
+      'name': 'Yoga Flow',
+      'duration': '30 min',
+      'difficulty': 'Low',
+      'icon': Icons.self_improvement,
+      'color': Colors.green.shade600,
+    },
+  ];
+
+  // Sample meals data
+  final List<Map<String, dynamic>> exploreMeals = [
+    {
+      'name': 'Protein Bowl',
+      'calories': '420 cal',
+      'time': 'Breakfast',
+      'icon': Icons.rice_bowl,
+      'color': Colors.green.shade600,
+    },
+    {
+      'name': 'Chicken Salad',
+      'calories': '350 cal',
+      'time': 'Lunch',
+      'icon': Icons.dinner_dining,
+      'color': Colors.orange.shade600,
+    },
+    {
+      'name': 'Smoothie Bowl',
+      'calories': '280 cal',
+      'time': 'Snack',
+      'icon': Icons.local_drink,
+      'color': Colors.purple.shade600,
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -96,12 +152,37 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
       vsync: this,
     );
     loadAndModifySvg();
+    _initializeChatMessages();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _messageController.dispose();
+    _chatScrollController.dispose();
     super.dispose();
+  }
+
+  void _initializeChatMessages() {
+    _chatMessages.addAll([
+      {
+        'text':
+            'Hello! I\'m your AI Fitness Coach. I can help you with workout routines, nutrition advice, and motivation. How can I assist you today?',
+        'isUser': false,
+        'timestamp': DateTime.now().subtract(const Duration(minutes: 5)),
+      },
+      {
+        'text': 'Hi! Can you suggest a workout for today?',
+        'isUser': true,
+        'timestamp': DateTime.now().subtract(const Duration(minutes: 4)),
+      },
+      {
+        'text':
+            'I\'d be happy to help! This feature is currently in development. Soon I\'ll be able to create personalized workout plans based on your fitness level and goals.',
+        'isUser': false,
+        'timestamp': DateTime.now().subtract(const Duration(minutes: 3)),
+      },
+    ]);
   }
 
   // Create pages list as a getter instead of initializing in initState
@@ -258,6 +339,613 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
             style: TextStyle(
               fontSize: _isMobile(context) ? 10 : 12,
               color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorkoutCard(Map<String, dynamic> workout) {
+    final String name = workout['name'] ?? 'Unknown Workout';
+    final String duration = workout['duration'] ?? '0 min';
+    final String difficulty = workout['difficulty'] ?? 'Medium';
+    final IconData icon = workout['icon'] ?? Icons.fitness_center;
+    final Color color = workout['color'] ?? Colors.blue.shade600;
+
+    final cardWidth = _isMobile(context)
+        ? 130.0
+        : _isTablet(context)
+        ? 150.0
+        : 170.0;
+
+    return Container(
+      width: cardWidth,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            setState(() {
+              selectedIndex = 0; // Navigate to workout screen
+            });
+          },
+          child: Container(
+            height: _isMobile(context) ? 120 : 140,
+            padding: EdgeInsets.all(_isMobile(context) ? 10 : 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: color, size: 18),
+                ),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: _getResponsiveFontSize(context, 11),
+                          color: AppColors.font1,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        duration,
+                        style: TextStyle(
+                          fontSize: _getResponsiveFontSize(context, 9),
+                          color: Colors.grey.shade600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    difficulty,
+                    style: TextStyle(
+                      fontSize: _getResponsiveFontSize(context, 8),
+                      color: color,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMealCard(Map<String, dynamic> meal) {
+    final String name = meal['name'] ?? 'Unknown Meal';
+    final String calories = meal['calories'] ?? '0 cal';
+    final String time = meal['time'] ?? 'Anytime';
+    final IconData icon = meal['icon'] ?? Icons.restaurant;
+    final Color color = meal['color'] ?? Colors.green.shade600;
+
+    final cardWidth = _isMobile(context)
+        ? 130.0
+        : _isTablet(context)
+        ? 150.0
+        : 170.0;
+
+    return Container(
+      width: cardWidth,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            setState(() {
+              selectedIndex = 2; // Navigate to nutrition screen
+            });
+          },
+          child: Container(
+            height: _isMobile(context) ? 120 : 140,
+            padding: EdgeInsets.all(_isMobile(context) ? 10 : 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: color, size: 18),
+                ),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: _getResponsiveFontSize(context, 11),
+                          color: AppColors.font1,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        calories,
+                        style: TextStyle(
+                          fontSize: _getResponsiveFontSize(context, 9),
+                          color: Colors.grey.shade600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    time,
+                    style: TextStyle(
+                      fontSize: _getResponsiveFontSize(context, 8),
+                      color: color,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // FIXED: Floating Action Button for Chatbot - No overflow
+  Widget _buildChatbotFAB() {
+    return Container(
+      margin: EdgeInsets.only(bottom: _isMobile(context) ? 80 : 90),
+      child: FloatingActionButton(
+        onPressed: () {
+          _showChatbotBottomSheet();
+        },
+        backgroundColor: Colors.green.shade600,
+        elevation: 4,
+        child: Icon(
+          Icons.smart_toy_outlined,
+          color: Colors.white,
+          size: 20, // Reduced size to prevent overflow
+        ),
+        tooltip: 'FitBot - AI Coach',
+      ),
+    );
+  }
+
+  // Send message function
+  void _sendMessage() {
+    if (_messageController.text.trim().isEmpty) return;
+
+    final userMessage = _messageController.text.trim();
+    setState(() {
+      _chatMessages.add({
+        'text': userMessage,
+        'isUser': true,
+        'timestamp': DateTime.now(),
+      });
+    });
+
+    _messageController.clear();
+    _scrollToBottom();
+
+    // Simulate AI response
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      setState(() {
+        _chatMessages.add({
+          'text':
+              'Thanks for your message! I\'m still learning and this feature will be enhanced with AI capabilities soon. Stay tuned for personalized fitness advice!',
+          'isUser': false,
+          'timestamp': DateTime.now(),
+        });
+      });
+      _scrollToBottom();
+    });
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_chatScrollController.hasClients) {
+        _chatScrollController.animateTo(
+          _chatScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
+    }
+  }
+
+  // IMPROVED: ChatGPT-style chat interface
+  void _showChatbotBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50, // ChatGPT-style background
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              // IMPROVED: Header with better styling
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.green.shade600,
+                            Colors.green.shade400,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.smart_toy_outlined,
+                        color: Colors.white,
+                        size: 20, // Consistent sizing
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'FitBot',
+                            style: TextStyle(
+                              color: AppColors.font1,
+                              fontWeight: FontWeight.bold,
+                              fontSize: _getResponsiveFontSize(context, 18),
+                            ),
+                          ),
+                          Text(
+                            'Online • Your personal assistant',
+                            style: TextStyle(
+                              color: Colors.green.shade600,
+                              fontSize: _getResponsiveFontSize(context, 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.close, color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+              ),
+
+              // IMPROVED: Chat Content
+              Expanded(child: _buildImprovedChatContent()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // IMPROVED: ChatGPT-style chat content
+  Widget _buildImprovedChatContent() {
+    return Column(
+      children: [
+        // Coming Soon Notice - More subtle
+        Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue.shade200, width: 1),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.blue.shade600, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Currently in development.',
+                  style: TextStyle(
+                    color: Colors.blue.shade800,
+                    fontSize: _getResponsiveFontSize(context, 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // IMPROVED: Messages with ChatGPT-style bubbles
+        Expanded(
+          child: ListView.builder(
+            controller: _chatScrollController,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _chatMessages.length,
+            itemBuilder: (context, index) {
+              return _buildImprovedChatMessage(_chatMessages[index]);
+            },
+          ),
+        ),
+
+        // IMPROVED: Input Area with better styling
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.grey.shade300, width: 1),
+                  ),
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: 'Message FitBot...',
+                      hintStyle: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: _getResponsiveFontSize(context, 14),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                    ),
+                    onSubmitted: (_) => _sendMessage(),
+                    enabled: true, // Enable for demo
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.green.shade600, Colors.green.shade400],
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: IconButton(
+                  onPressed: _sendMessage,
+                  icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // IMPROVED: ChatGPT-style message bubbles
+  Widget _buildImprovedChatMessage(Map<String, dynamic> message) {
+    final bool isUser = message['isUser'];
+    final String text = message['text'];
+    final DateTime timestamp = message['timestamp'];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: isUser
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: isUser
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (!isUser) ...[
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.green.shade600, Colors.green.shade400],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Icons.smart_toy_outlined,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isUser ? Colors.green.shade600 : Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(20),
+                      topRight: const Radius.circular(20),
+                      bottomLeft: isUser
+                          ? const Radius.circular(20)
+                          : const Radius.circular(4),
+                      bottomRight: isUser
+                          ? const Radius.circular(4)
+                          : const Radius.circular(20),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      color: isUser ? Colors.white : Colors.black87,
+                      fontSize: _getResponsiveFontSize(context, 14),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ),
+              if (isUser) ...[
+                const SizedBox(width: 8),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade600,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(Icons.person, color: Colors.white, size: 16),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: EdgeInsets.only(
+              left: isUser ? 0 : 40,
+              right: isUser ? 40 : 0,
+            ),
+            child: Text(
+              _formatTime(timestamp),
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: _getResponsiveFontSize(context, 11),
+              ),
             ),
           ),
         ],
@@ -577,127 +1265,97 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
 
             SizedBox(height: _isMobile(context) ? 16 : 24),
 
-            // Quick Action Buttons
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(_isMobile(context) ? 16 : 20),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Quick Actions',
+            // Explore Workouts Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Explore Workouts',
+                  style: TextStyle(
+                    color: AppColors.font1,
+                    fontWeight: FontWeight.bold,
+                    fontSize: _getResponsiveFontSize(context, 18),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      selectedIndex = 0;
+                    });
+                  },
+                  child: Text(
+                    'View All',
                     style: TextStyle(
-                      color: AppColors.font1,
-                      fontWeight: FontWeight.bold,
-                      fontSize: _getResponsiveFontSize(context, 16),
+                      color: AppColors.buttons,
+                      fontSize: _getResponsiveFontSize(context, 12),
                     ),
                   ),
-                  SizedBox(height: _isMobile(context) ? 12 : 16),
-                  // Responsive button layout
-                  _isMobile(context)
-                      ? Column(
-                          children: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  setState(() {
-                                    selectedIndex = 0;
-                                  });
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.buttons,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                icon: Icon(Icons.fitness_center, size: 18),
-                                label: Text('Start Workout'),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  setState(() {
-                                    selectedIndex = 2;
-                                  });
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green.shade600,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                icon: Icon(Icons.restaurant, size: 18),
-                                label: Text('Log Meal'),
-                              ),
-                            ),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  setState(() {
-                                    selectedIndex = 0;
-                                  });
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.buttons,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                icon: Icon(Icons.fitness_center, size: 18),
-                                label: Text('Start Workout'),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  setState(() {
-                                    selectedIndex = 2;
-                                  });
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green.shade600,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                icon: Icon(Icons.restaurant, size: 18),
-                                label: Text('Log Meal'),
-                              ),
-                            ),
-                          ],
-                        ),
-                ],
+                ),
+              ],
+            ),
+            SizedBox(height: _isMobile(context) ? 12 : 16),
+
+            // Workouts horizontal list with proper constraints
+            SizedBox(
+              height: _isMobile(context) ? 120 : 140,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.zero,
+                physics: const BouncingScrollPhysics(),
+                itemCount: exploreWorkouts.length,
+                itemBuilder: (context, index) {
+                  return _buildWorkoutCard(exploreWorkouts[index]);
+                },
               ),
             ),
+
+            SizedBox(height: _isMobile(context) ? 16 : 24),
+
+            // Explore Meals Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Explore Meals',
+                  style: TextStyle(
+                    color: AppColors.font1,
+                    fontWeight: FontWeight.bold,
+                    fontSize: _getResponsiveFontSize(context, 18),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      selectedIndex = 2;
+                    });
+                  },
+                  child: Text(
+                    'View All',
+                    style: TextStyle(
+                      color: AppColors.buttons,
+                      fontSize: _getResponsiveFontSize(context, 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: _isMobile(context) ? 12 : 16),
+
+            // Meals horizontal list with proper constraints
+            SizedBox(
+              height: _isMobile(context) ? 120 : 140,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.zero,
+                physics: const BouncingScrollPhysics(),
+                itemCount: exploreMeals.length,
+                itemBuilder: (context, index) {
+                  return _buildMealCard(exploreMeals[index]);
+                },
+              ),
+            ),
+
+            SizedBox(height: _isMobile(context) ? 16 : 24),
           ],
         ),
       ),
@@ -709,6 +1367,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
     return Scaffold(
       appBar: selectedIndex == 1
           ? AppBar(
+              automaticallyImplyLeading: false,
               title: Text(
                 'GetFit',
                 style: TextStyle(
@@ -721,13 +1380,28 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
               elevation: 0,
               actions: [
                 IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.logout, size: _isMobile(context) ? 22 : 24),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfileScreen(),
+                      ),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.person_2_outlined,
+                    size: _isMobile(context) ? 22 : 24,
+                  ),
                 ),
               ],
             )
           : null,
       body: pages[selectedIndex],
+
+      // FIXED: Floating action button with proper sizing - no overflow
+      floatingActionButton: selectedIndex == 1 ? _buildChatbotFAB() : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [

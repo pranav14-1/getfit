@@ -390,6 +390,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           'Track Nutrition',
           style: TextStyle(
