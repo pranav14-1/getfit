@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:getfit/app_sections/sections/landing_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:getfit/components/colors.dart';
+import 'package:getfit/components/theme_provider.dart';
+import 'package:getfit/app_sections/sections/landing_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,7 +12,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _isDarkTheme = false;
   bool _notificationsEnabled = true;
 
   // Responsive breakpoints
@@ -87,7 +88,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             subtitle,
                             style: TextStyle(
                               fontSize: _getResponsiveFontSize(context, 12),
-                              color: Colors.grey.shade600,
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -97,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   trailing ??
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: Colors.grey.shade400,
+                        color: AppColors.textSecondary,
                         size: 16,
                       ),
                 ],
@@ -108,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (showDivider)
           Divider(
             height: 1,
-            color: Colors.grey.shade200,
+            color: AppColors.dividerColor,
             indent: _isMobile(context) ? 52 : 60,
           ),
       ],
@@ -126,7 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Container(
         padding: EdgeInsets.all(_isMobile(context) ? 16 : 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -159,7 +160,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title,
               style: TextStyle(
                 fontSize: _getResponsiveFontSize(context, 12),
-                color: Colors.grey.shade600,
+                color: AppColors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -176,6 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Theme.of(context).cardTheme.color,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -191,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'Are you sure you want to logout?',
             style: TextStyle(
               fontSize: _getResponsiveFontSize(context, 14),
-              color: Colors.grey.shade700,
+              color: AppColors.textSecondary,
             ),
           ),
           actions: <Widget>[
@@ -199,7 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Text(
                 'Cancel',
                 style: TextStyle(
-                  color: Colors.grey.shade600,
+                  color: AppColors.textSecondary,
                   fontSize: _getResponsiveFontSize(context, 14),
                 ),
               ),
@@ -234,19 +236,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Perform logout function
   void _performLogout() {
-    // Clear any stored user data, tokens, preferences, etc.
-    // For example:
-    // SharedPreferences.getInstance().then((prefs) {
-    //   prefs.clear();
-    // });
-
-    // Navigate to landing screen and clear navigation stack
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const LandingScreen()),
       (Route<dynamic> route) => false,
     );
 
-    // Show logout success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Logged out successfully'),
@@ -262,18 +256,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final padding = _getResponsivePadding(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Profile',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: _getResponsiveFontSize(context, 24),
+            color: AppColors.font1,
           ),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: AppColors.font1),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -366,7 +362,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Settings Section
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardTheme.color,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -386,36 +382,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         // Navigate to edit profile
                       },
                     ),
-                    _buildProfileOption(
-                      icon: Icons.palette_outlined,
-                      title: 'Theme',
-                      subtitle: _isDarkTheme ? 'Dark mode' : 'Light mode',
-                      trailing: Switch(
-                        value: _isDarkTheme,
-                        onChanged: (value) {
-                          setState(() {
-                            _isDarkTheme = value;
-                          });
-                          // Implement theme change logic here
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Theme changed to ${value ? 'Dark' : 'Light'} mode',
-                              ),
-                              backgroundColor: AppColors.buttons,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          );
-                        },
-                        activeColor: AppColors.buttons,
-                      ),
-                      onTap: () {
-                        setState(() {
-                          _isDarkTheme = !_isDarkTheme;
-                        });
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, child) {
+                        return _buildProfileOption(
+                          icon: Icons.palette_outlined,
+                          title: 'Theme',
+                          subtitle: themeProvider.isDarkMode
+                              ? 'Dark mode'
+                              : 'Light mode',
+                          trailing: Switch(
+                            value: themeProvider.isDarkMode,
+                            onChanged: (value) {
+                              themeProvider.toggleTheme();
+                            },
+                            activeColor: AppColors.buttons,
+                          ),
+                          onTap: () {
+                            themeProvider.toggleTheme();
+                          },
+                        );
                       },
                     ),
                     _buildProfileOption(
@@ -449,6 +434,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
                     _buildProfileOption(
+                      icon: Icons.help_outline,
+                      title: 'Help & Support',
+                      subtitle: 'Get help or contact us',
+                      onTap: () {
+                        // Navigate to help screen
+                      },
+                    ),
+                    _buildProfileOption(
+                      icon: Icons.privacy_tip_outlined,
+                      title: 'Privacy Policy',
+                      subtitle: 'Read our privacy terms',
+                      onTap: () {
+                        // Navigate to privacy policy
+                      },
+                    ),
+                    _buildProfileOption(
                       icon: Icons.logout,
                       title: 'Logout',
                       subtitle: 'Sign out of your account',
@@ -466,7 +467,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(
                 'GetFit v1.0.0',
                 style: TextStyle(
-                  color: Colors.grey.shade500,
+                  color: AppColors.textSecondary,
                   fontSize: _getResponsiveFontSize(context, 12),
                 ),
               ),

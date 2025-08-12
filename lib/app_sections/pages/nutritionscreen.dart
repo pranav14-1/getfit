@@ -117,7 +117,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
     return baseSize;
   }
 
-  // Build macro progress indicator
+  // Build macro progress indicator with theme support
   Widget _buildMacroIndicator({
     required BuildContext context,
     required String title,
@@ -136,7 +136,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
       child: Container(
         padding: EdgeInsets.all(_isMobile(context) ? 12 : 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -170,14 +170,14 @@ class _NutritionscreenState extends State<Nutritionscreen>
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: _isMobile(context) ? 12 : 14,
-                color: Colors.grey.shade700,
+                color: AppColors.textSecondary,
               ),
             ),
             Text(
               '$current/$target',
               style: TextStyle(
                 fontSize: _isMobile(context) ? 10 : 12,
-                color: Colors.grey.shade500,
+                color: AppColors.textSecondary,
               ),
             ),
           ],
@@ -186,7 +186,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
     );
   }
 
-  // Build responsive text field
+  // Build responsive text field with theme support
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
@@ -198,24 +198,28 @@ class _NutritionscreenState extends State<Nutritionscreen>
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
+        style: TextStyle(color: AppColors.font1),
         decoration: InputDecoration(
           labelText: labelText,
           hintText: hintText,
           filled: true,
-          fillColor: Colors.grey.shade50,
+          fillColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.grey.shade800
+              : Colors.grey.shade50,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: BorderSide(color: AppColors.dividerColor),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: AppColors.buttons, width: 2),
           ),
-          labelStyle: TextStyle(color: Colors.grey.shade600),
+          labelStyle: TextStyle(color: AppColors.textSecondary),
+          hintStyle: TextStyle(color: AppColors.textSecondary),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 16,
@@ -225,7 +229,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
     );
   }
 
-  // Build diet history item with daily totals and null safety
+  // Build diet history item with theme support
   Widget _buildDietHistoryItem(Map<String, dynamic> item) {
     // Get status color with null safety
     Color getStatusColor(String? status, double? progress) {
@@ -257,9 +261,9 @@ class _NutritionscreenState extends State<Nutritionscreen>
       margin: const EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(_isMobile(context) ? 12 : 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.dividerColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -282,7 +286,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: _isMobile(context) ? 16 : 18,
-                      color: Colors.grey.shade800,
+                      color: AppColors.font1,
                     ),
                   ),
                   if (fullDate.isNotEmpty)
@@ -290,7 +294,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
                       fullDate,
                       style: TextStyle(
                         fontSize: _isMobile(context) ? 12 : 14,
-                        color: Colors.grey.shade500,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                 ],
@@ -335,7 +339,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
                         style: TextStyle(
                           fontSize: _isMobile(context) ? 14 : 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade800,
+                          color: AppColors.font1,
                         ),
                       ),
                     ],
@@ -344,7 +348,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
                     '$mealsCount meals',
                     style: TextStyle(
                       fontSize: _isMobile(context) ? 12 : 14,
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -352,7 +356,9 @@ class _NutritionscreenState extends State<Nutritionscreen>
               const SizedBox(height: 8),
               LinearProgressIndicator(
                 value: progress > 1.0 ? 1.0 : progress,
-                backgroundColor: Colors.grey.shade200,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey.shade700
+                    : Colors.grey.shade200,
                 valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                 minHeight: 6,
                 borderRadius: BorderRadius.circular(3),
@@ -365,14 +371,14 @@ class _NutritionscreenState extends State<Nutritionscreen>
                     '${(progress * 100).toInt()}% of target',
                     style: TextStyle(
                       fontSize: _isMobile(context) ? 10 : 12,
-                      color: Colors.grey.shade500,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   Text(
                     'Target: $targetCalories cal',
                     style: TextStyle(
                       fontSize: _isMobile(context) ? 10 : 12,
-                      color: Colors.grey.shade500,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -389,6 +395,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
     final padding = _getResponsivePadding(context);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
@@ -396,6 +403,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: _getResponsiveFontSize(context, 20),
+            color: AppColors.font1,
           ),
         ),
         centerTitle: true,
@@ -574,7 +582,7 @@ class _NutritionscreenState extends State<Nutritionscreen>
                 width: double.infinity,
                 padding: EdgeInsets.all(_isMobile(context) ? 16 : 20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.cardColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -722,12 +730,12 @@ class _NutritionscreenState extends State<Nutritionscreen>
                   icon: Icon(
                     Icons.history,
                     size: 18,
-                    color: Colors.grey.shade600,
+                    color: AppColors.textSecondary,
                   ),
                   label: Text(
                     'View Full History',
                     style: TextStyle(
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                       fontSize: _getResponsiveFontSize(context, 12),
                     ),
                   ),

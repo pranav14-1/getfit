@@ -13,13 +13,11 @@ class _WorkoutscreenState extends State<Workoutscreen>
   late AnimationController _animationController;
   late AnimationController _floatingController;
 
-  // Sample workout routines data matching home theme
   final List<Map<String, dynamic>> workoutRoutines = [
     {
       'name': 'Push Day',
       'exercises': 6,
       'duration': '45 min',
-      'difficulty': 'Intermediate',
       'lastPerformed': '2 days ago',
       'icon': Icons.fitness_center,
       'color': Colors.orange.shade600,
@@ -29,7 +27,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
       'name': 'Pull Day',
       'exercises': 5,
       'duration': '40 min',
-      'difficulty': 'Intermediate',
       'lastPerformed': '4 days ago',
       'icon': Icons.sports_gymnastics,
       'color': Colors.blue.shade600,
@@ -39,7 +36,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
       'name': 'Leg Day',
       'exercises': 7,
       'duration': '50 min',
-      'difficulty': 'Advanced',
       'lastPerformed': '1 week ago',
       'icon': Icons.directions_run,
       'color': Colors.green.shade600,
@@ -122,7 +118,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
     return baseSize;
   }
 
-  // Welcome card matching home theme
+  // Welcome card matching home theme with theme support
   Widget _buildWelcomeCard() {
     return Container(
       width: double.infinity,
@@ -254,12 +250,11 @@ class _WorkoutscreenState extends State<Workoutscreen>
     );
   }
 
-  // Routine card with progress bar removed
+  // Routine card with theme support
   Widget _buildRoutineCard(Map<String, dynamic> routine) {
     final String name = routine['name'] ?? 'Unknown Workout';
     final int exercises = routine['exercises'] ?? 0;
     final String duration = routine['duration'] ?? '0 min';
-    final String difficulty = routine['difficulty'] ?? 'Beginner';
     final String lastPerformed = routine['lastPerformed'] ?? 'Never';
     final IconData icon = routine['icon'] ?? Icons.fitness_center;
     final Color color = routine['color'] ?? Colors.orange.shade600;
@@ -270,7 +265,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
     return Container(
       margin: EdgeInsets.only(bottom: _isMobile(context) ? 16 : 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -333,7 +328,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
                             '$exercises exercises • $duration',
                             style: TextStyle(
                               fontSize: _getResponsiveFontSize(context, 14),
-                              color: Colors.grey.shade600,
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -348,14 +343,6 @@ class _WorkoutscreenState extends State<Workoutscreen>
                         color: Colors.green.shade50,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: Colors.green.shade200),
-                      ),
-                      child: Text(
-                        difficulty,
-                        style: TextStyle(
-                          color: Colors.green.shade700,
-                          fontSize: _getResponsiveFontSize(context, 12),
-                          fontWeight: FontWeight.w500,
-                        ),
                       ),
                     ),
                   ],
@@ -375,14 +362,21 @@ class _WorkoutscreenState extends State<Workoutscreen>
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade700
+                                : Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
                             group,
                             style: TextStyle(
                               fontSize: _getResponsiveFontSize(context, 12),
-                              color: Colors.grey.shade700,
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.grey.shade300
+                                  : Colors.grey.shade700,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -397,7 +391,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
                   'Last performed: $lastPerformed',
                   style: TextStyle(
                     fontSize: _getResponsiveFontSize(context, 12),
-                    color: Colors.grey.shade500,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -408,7 +402,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
     );
   }
 
-  // History item matching home theme
+  // History item with theme support
   Widget _buildHistoryItem(Map<String, dynamic> item) {
     final String date = item['date'] ?? 'Unknown Date';
     final String workout = item['workout'] ?? 'Unknown Workout';
@@ -421,7 +415,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
       margin: EdgeInsets.only(bottom: _isMobile(context) ? 12 : 16),
       padding: EdgeInsets.all(_isMobile(context) ? 12 : 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -455,7 +449,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
                       workout,
                       style: TextStyle(
                         fontSize: _getResponsiveFontSize(context, 12),
-                        color: Colors.grey.shade600,
+                        color: AppColors.textSecondary,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -529,7 +523,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
     final padding = _getResponsivePadding(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(
@@ -537,6 +531,7 @@ class _WorkoutscreenState extends State<Workoutscreen>
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: _getResponsiveFontSize(context, 26),
+            color: AppColors.font1,
           ),
         ),
         centerTitle: true,
@@ -660,12 +655,12 @@ class _WorkoutscreenState extends State<Workoutscreen>
                   icon: Icon(
                     Icons.history,
                     size: 18,
-                    color: Colors.grey.shade600,
+                    color: AppColors.textSecondary,
                   ),
                   label: Text(
                     'View Full History',
                     style: TextStyle(
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                       fontSize: _getResponsiveFontSize(context, 12),
                     ),
                   ),

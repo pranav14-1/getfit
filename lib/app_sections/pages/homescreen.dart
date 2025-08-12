@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:getfit/app_sections/sections/profile_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:getfit/components/colors.dart';
+import 'package:getfit/components/theme_provider.dart';
 import 'package:getfit/app_sections/pages/nutritionscreen.dart';
 import 'package:getfit/app_sections/pages/wrokoutscreen.dart';
+import 'package:getfit/app_sections/sections/profile_screen.dart';
 import 'package:percent_indicator/flutter_percent_indicator.dart';
 
 class Homescreen extends StatefulWidget {
@@ -166,8 +169,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
   void _initializeChatMessages() {
     _chatMessages.addAll([
       {
-        'text':
-            'Hello! I\'m your AI Fitness Coach. I can help you with workout routines, nutrition advice, and motivation. How can I assist you today?',
+        'text': 'Hello! I\'m your AI Fitness Coach. I can help you with workout routines, nutrition advice, and motivation. How can I assist you today?',
         'isUser': false,
         'timestamp': DateTime.now().subtract(const Duration(minutes: 5)),
       },
@@ -177,8 +179,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
         'timestamp': DateTime.now().subtract(const Duration(minutes: 4)),
       },
       {
-        'text':
-            'I\'d be happy to help! This feature is currently in development. Soon I\'ll be able to create personalized workout plans based on your fitness level and goals.',
+        'text': 'I\'d be happy to help! This feature is currently in development. Soon I\'ll be able to create personalized workout plans based on your fitness level and goals.',
         'isUser': false,
         'timestamp': DateTime.now().subtract(const Duration(minutes: 3)),
       },
@@ -265,7 +266,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
           label,
           style: TextStyle(
             fontSize: _isMobile(context) ? 10 : 11,
-            color: Colors.grey.shade600,
+            color: AppColors.textSecondary,
           ),
         ),
       ],
@@ -292,7 +293,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
     return Container(
       padding: EdgeInsets.all(_isMobile(context) ? 16 : 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -320,6 +321,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: _isMobile(context) ? 10 : 12,
+                    color: AppColors.font1,
                   ),
                 ),
               ],
@@ -331,14 +333,14 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: _isMobile(context) ? 12 : 14,
-              color: Colors.grey.shade700,
+              color: AppColors.textSecondary,
             ),
           ),
           Text(
             subtitle,
             style: TextStyle(
               fontSize: _isMobile(context) ? 10 : 12,
-              color: Colors.grey.shade500,
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -363,7 +365,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
       width: cardWidth,
       margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -419,7 +421,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                         duration,
                         style: TextStyle(
                           fontSize: _getResponsiveFontSize(context, 9),
-                          color: Colors.grey.shade600,
+                          color: AppColors.textSecondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -472,7 +474,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
       width: cardWidth,
       margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -528,7 +530,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                         calories,
                         style: TextStyle(
                           fontSize: _getResponsiveFontSize(context, 9),
-                          color: Colors.grey.shade600,
+                          color: AppColors.textSecondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -572,12 +574,12 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
         onPressed: () {
           _showChatbotBottomSheet();
         },
-        backgroundColor: Colors.green.shade600,
+        backgroundColor: AppColors.buttons,
         elevation: 4,
         child: Icon(
           Icons.smart_toy_outlined,
           color: Colors.white,
-          size: 20, // Reduced size to prevent overflow
+          size: 20,
         ),
         tooltip: 'FitBot - AI Coach',
       ),
@@ -604,8 +606,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
     Future.delayed(const Duration(milliseconds: 1000), () {
       setState(() {
         _chatMessages.add({
-          'text':
-              'Thanks for your message! I\'m still learning and this feature will be enhanced with AI capabilities soon. Stay tuned for personalized fitness advice!',
+          'text': 'Thanks for your message! I\'m still learning and this feature will be enhanced with AI capabilities soon. Stay tuned for personalized fitness advice!',
           'isUser': false,
           'timestamp': DateTime.now(),
         });
@@ -653,7 +654,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
         maxChildSize: 0.95,
         builder: (context, scrollController) => Container(
           decoration: BoxDecoration(
-            color: Colors.grey.shade50, // ChatGPT-style background
+            color: Theme.of(context).scaffoldBackgroundColor,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -667,16 +668,16 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: AppColors.textSecondary,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-
+              
               // IMPROVED: Header with better styling
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardTheme.color,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -691,17 +692,14 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            Colors.green.shade600,
-                            Colors.green.shade400,
-                          ],
+                          colors: [Colors.green.shade600, Colors.green.shade400],
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.smart_toy_outlined,
                         color: Colors.white,
-                        size: 20, // Consistent sizing
+                        size: 20,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -710,7 +708,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'FitBot',
+                            'AI Fitness Coach',
                             style: TextStyle(
                               color: AppColors.font1,
                               fontWeight: FontWeight.bold,
@@ -729,14 +727,19 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: Icon(Icons.close, color: Colors.grey.shade600),
+                      icon: Icon(
+                        Icons.close,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
               ),
-
+              
               // IMPROVED: Chat Content
-              Expanded(child: _buildImprovedChatContent()),
+              Expanded(
+                child: _buildImprovedChatContent(),
+              ),
             ],
           ),
         ),
@@ -755,15 +758,22 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             color: Colors.blue.shade50,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue.shade200, width: 1),
+            border: Border.all(
+              color: Colors.blue.shade200,
+              width: 1,
+            ),
           ),
           child: Row(
             children: [
-              Icon(Icons.info_outline, color: Colors.blue.shade600, size: 20),
+              Icon(
+                Icons.info_outline,
+                color: Colors.blue.shade600,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Currently in development.',
+                  'AI features are coming soon! Currently in development.',
                   style: TextStyle(
                     color: Colors.blue.shade800,
                     fontSize: _getResponsiveFontSize(context, 12),
@@ -773,7 +783,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
             ],
           ),
         ),
-
+        
         // IMPROVED: Messages with ChatGPT-style bubbles
         Expanded(
           child: ListView.builder(
@@ -785,12 +795,12 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
             },
           ),
         ),
-
+        
         // IMPROVED: Input Area with better styling
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardTheme.color,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -804,16 +814,20 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.grey.shade300, width: 1),
+                    border: Border.all(
+                      color: AppColors.dividerColor,
+                      width: 1,
+                    ),
                   ),
                   child: TextField(
                     controller: _messageController,
+                    style: TextStyle(color: AppColors.font1),
                     decoration: InputDecoration(
-                      hintText: 'Message FitBot...',
+                      hintText: 'Message AI Coach...',
                       hintStyle: TextStyle(
-                        color: Colors.grey.shade500,
+                        color: AppColors.textSecondary,
                         fontSize: _getResponsiveFontSize(context, 14),
                       ),
                       border: InputBorder.none,
@@ -823,7 +837,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                       ),
                     ),
                     onSubmitted: (_) => _sendMessage(),
-                    enabled: true, // Enable for demo
+                    enabled: true,
                   ),
                 ),
               ),
@@ -856,14 +870,10 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Column(
-        crossAxisAlignment: isUser
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
+        crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: isUser
-                ? MainAxisAlignment.end
-                : MainAxisAlignment.start,
+            mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (!isUser) ...[
@@ -886,21 +896,16 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
               ],
               Flexible(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isUser ? Colors.green.shade600 : Colors.white,
+                    color: isUser 
+                        ? Colors.green.shade600 
+                        : Theme.of(context).cardTheme.color,
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(20),
                       topRight: const Radius.circular(20),
-                      bottomLeft: isUser
-                          ? const Radius.circular(20)
-                          : const Radius.circular(4),
-                      bottomRight: isUser
-                          ? const Radius.circular(4)
-                          : const Radius.circular(20),
+                      bottomLeft: isUser ? const Radius.circular(20) : const Radius.circular(4),
+                      bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(20),
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -913,7 +918,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                   child: Text(
                     text,
                     style: TextStyle(
-                      color: isUser ? Colors.white : Colors.black87,
+                      color: isUser ? Colors.white : AppColors.font1,
                       fontSize: _getResponsiveFontSize(context, 14),
                       height: 1.4,
                     ),
@@ -929,7 +934,11 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                     color: Colors.green.shade600,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(Icons.person, color: Colors.white, size: 16),
+                  child: Icon(
+                    Icons.person,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
               ],
             ],
@@ -943,7 +952,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
             child: Text(
               _formatTime(timestamp),
               style: TextStyle(
-                color: Colors.grey.shade500,
+                color: AppColors.textSecondary,
                 fontSize: _getResponsiveFontSize(context, 11),
               ),
             ),
@@ -1038,7 +1047,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
               width: double.infinity,
               padding: EdgeInsets.all(_isMobile(context) ? 16 : 20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardTheme.color,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -1096,7 +1105,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                                 children: [
                                   CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.black54,
+                                      AppColors.buttons,
                                     ),
                                   ),
                                   SizedBox(
@@ -1105,7 +1114,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                                   Text(
                                     'Loading muscle map...',
                                     style: TextStyle(
-                                      color: Colors.grey.shade600,
+                                      color: AppColors.textSecondary,
                                       fontSize: _getResponsiveFontSize(
                                         context,
                                         12,
@@ -1365,6 +1374,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: selectedIndex == 1
           ? AppBar(
               automaticallyImplyLeading: false,
@@ -1373,6 +1383,7 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: _getResponsiveFontSize(context, 26),
+                  color: AppColors.font1,
                 ),
               ),
               centerTitle: true,
@@ -1391,17 +1402,18 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                   icon: Icon(
                     Icons.person_2_outlined,
                     size: _isMobile(context) ? 22 : 24,
+                    color: AppColors.font1,
                   ),
                 ),
               ],
             )
           : null,
       body: pages[selectedIndex],
-
+      
       // FIXED: Floating action button with proper sizing - no overflow
       floatingActionButton: selectedIndex == 1 ? _buildChatbotFAB() : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-
+      
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -1428,9 +1440,9 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                 selectedIndex = index;
               });
             },
-            backgroundColor: Colors.white,
-            selectedItemColor: Colors.black,
-            unselectedItemColor: Colors.grey.shade400,
+            backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+            selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+            unselectedItemColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
             selectedFontSize: _isMobile(context) ? 12 : 14,
             unselectedFontSize: _isMobile(context) ? 10 : 12,
             iconSize: _isMobile(context) ? 24 : 28,
@@ -1442,7 +1454,9 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                   padding: EdgeInsets.all(selectedIndex == 0 ? 8 : 4),
                   decoration: BoxDecoration(
                     color: selectedIndex == 0
-                        ? Colors.black.withOpacity(0.1)
+                        ? (Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.white.withOpacity(0.1)
+                            : Colors.black.withOpacity(0.1))
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -1460,7 +1474,9 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                   padding: EdgeInsets.all(selectedIndex == 1 ? 8 : 4),
                   decoration: BoxDecoration(
                     color: selectedIndex == 1
-                        ? Colors.black.withOpacity(0.1)
+                        ? (Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.white.withOpacity(0.1)
+                            : Colors.black.withOpacity(0.1))
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -1478,7 +1494,9 @@ class _HomescreenState extends State<Homescreen> with TickerProviderStateMixin {
                   padding: EdgeInsets.all(selectedIndex == 2 ? 8 : 4),
                   decoration: BoxDecoration(
                     color: selectedIndex == 2
-                        ? Colors.black.withOpacity(0.1)
+                        ? (Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.white.withOpacity(0.1)
+                            : Colors.black.withOpacity(0.1))
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
