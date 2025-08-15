@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:getfit/app_sections/sections/profile_screen.dart';
-import 'package:provider/provider.dart';
 import 'package:getfit/components/colors.dart';
-import 'package:getfit/components/theme_provider.dart';
 import 'package:getfit/app_sections/pages/nutritionscreen.dart';
 import 'package:getfit/app_sections/pages/wrokoutscreen.dart';
-import 'package:getfit/app_sections/sections/profile_screen.dart';
 import 'package:percent_indicator/flutter_percent_indicator.dart';
 
 class Homescreen extends StatefulWidget {

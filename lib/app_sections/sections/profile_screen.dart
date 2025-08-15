@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:getfit/app_sections/sections/profile_features/edit_profile.dart';
+import 'package:getfit/app_sections/sections/profile_features/progress_stats.dart';
+import 'package:getfit/app_sections/sections/profile_features/workout_preference.dart';
 import 'package:provider/provider.dart';
 import 'package:getfit/components/colors.dart';
 import 'package:getfit/components/theme_provider.dart';
@@ -251,6 +254,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // Navigate to Edit Profile Screen
+  void _navigateToEditProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+    );
+  }
+
+  // Navigate to Workout Preferences Screen
+  void _navigateToWorkoutPreferences() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const WorkoutPreferencesScreen()),
+    );
+  }
+
+  // Navigate to Progress & Stats Screen
+  void _navigateToProgressStats() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProgressStatsScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final padding = _getResponsivePadding(context);
@@ -374,14 +401,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Column(
                   children: [
+                    // Edit Profile - Updated with navigation
                     _buildProfileOption(
                       icon: Icons.person_outline,
                       title: 'Edit Profile',
                       subtitle: 'Update your personal information',
-                      onTap: () {
-                        // Navigate to edit profile
-                      },
+                      onTap: _navigateToEditProfile,
                     ),
+
+                    // Theme Toggle
                     Consumer<ThemeProvider>(
                       builder: (context, themeProvider, child) {
                         return _buildProfileOption(
@@ -403,6 +431,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
+
+                    // Notifications Toggle
                     _buildProfileOption(
                       icon: Icons.notifications_outlined,
                       title: 'Notifications',
@@ -417,38 +447,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         activeColor: AppColors.buttons,
                       ),
                     ),
+
+                    // Workout Preferences - Updated with navigation
                     _buildProfileOption(
                       icon: Icons.fitness_center,
                       title: 'Workout Preferences',
                       subtitle: 'Set your fitness goals',
-                      onTap: () {
-                        // Navigate to workout preferences
-                      },
+                      onTap: _navigateToWorkoutPreferences,
                     ),
+
+                    // Progress & Stats - Updated with navigation
                     _buildProfileOption(
                       icon: Icons.bar_chart_outlined,
                       title: 'Progress & Stats',
                       subtitle: 'View detailed analytics',
-                      onTap: () {
-                        // Navigate to progress screen
-                      },
+                      onTap: _navigateToProgressStats,
                     ),
-                    _buildProfileOption(
-                      icon: Icons.help_outline,
-                      title: 'Help & Support',
-                      subtitle: 'Get help or contact us',
-                      onTap: () {
-                        // Navigate to help screen
-                      },
-                    ),
-                    _buildProfileOption(
-                      icon: Icons.privacy_tip_outlined,
-                      title: 'Privacy Policy',
-                      subtitle: 'Read our privacy terms',
-                      onTap: () {
-                        // Navigate to privacy policy
-                      },
-                    ),
+
+                    // Logout
                     _buildProfileOption(
                       icon: Icons.logout,
                       title: 'Logout',
